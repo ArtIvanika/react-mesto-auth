@@ -12,42 +12,43 @@ import Register from "./Register";
 import Login from "./Login";
 import InfoTooltip from "./InfoTooltip";
 import api from "../utils/Api";
-import React from "react";
+import {useEffect, useState} from "react";
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
 import ProtectedRouteElement from "./ ProtectedRoute";
 
 function App() {
-  const [loggedIn, setLoggedIn] = React.useState(false);
-  const [userData, setUserData] = React.useState(null);
-  const [currentUser, setCurrentUser] = React.useState({});
-  const [cards, setCards] = React.useState([]);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [statusInfoTooltip, setStatusInfoTooltip] = React.useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [userData, setUserData] = useState(null);
+  const [currentUser, setCurrentUser] = useState({});
+  const [cards, setCards] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [statusInfoTooltip, setStatusInfoTooltip] = useState(false);
 
   const navigate = useNavigate();
 
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] =
-    React.useState(false);
-  const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = React.useState(false);
+    useState(false);
+  const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] =
-    React.useState(false);
-    const [isInfoTooltipPopupOpen, setInfoTooltipPopupOpen] = React.useState(false);
+    useState(false);
+    const [isInfoTooltipPopupOpen, setInfoTooltipPopupOpen] = useState(false);
   //попап удаления
   const [isDeleteCardPopupOpen, setIsDeleteCardPopupOpen] =
-    React.useState(false);
-  const [selectedCard, setSelectedCard] = React.useState({
+    useState(false);
+  const [selectedCard, setSelectedCard] = useState({
     isOpen: false,
     item: {},
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
+    if(loggedIn){
     Promise.all([api.getUserInfo(), api.getInitialCards()])
       .then(([userData, cards]) => {
         setCurrentUser(userData);
         setCards(cards);
-      })
-      .catch((err) => console.log(err));
-  }, []);
+  })
+      .catch((err) => console.log(err));}
+  }, [loggedIn]);
 
   function handleEditAvatarClick() {
     setIsEditAvatarPopupOpen(true);
@@ -62,10 +63,6 @@ function App() {
   function handleDeleteCardClick() {
     setIsDeleteCardPopupOpen(true);
   }
-
-  // function handleIsLoading(){
-
-  // }
 
   // закрытие всех попапов
   function closeAllPopups() {
@@ -87,7 +84,7 @@ function App() {
     selectedCard.isOpen;
 
   //закрытие по "Escape"
-  React.useEffect(() => {
+  useEffect(() => {
     function closeByEscape(evt) {
       if (evt.key === "Escape") {
         closeAllPopups();
@@ -156,8 +153,7 @@ function App() {
           setCards((state) =>
             state.map((c) => (c._id === card._id ? newCard : c))
           );
-        })
-        .catch((err) => console.log(err));
+        }).catch((err) => console.log(err));
     } else {
       api
         .deleteLike(card._id, !isLiked)
@@ -165,8 +161,7 @@ function App() {
           setCards((state) =>
             state.map((c) => (c._id === card._id ? newCard : c))
           );
-        })
-        .catch((err) => console.log(err));
+        }).catch((err) => console.log(err));
     }
   }
 
@@ -186,8 +181,9 @@ function App() {
   function handleLogin(email, password){
     auth.authorize(email, password)
     .then((data) => {
+      console.log(data)
       if(data.token){
-        checkAuthToken();
+        setUserData(email);
         setLoggedIn(true);
         navigate("/cards", { replace: true });
   }})
@@ -215,7 +211,7 @@ function App() {
 
 function signOut() {
   localStorage.removeItem("token");
-  // setUserData("");
+  setUserData("");
   setLoggedIn(false);
   navigate("/signin", { replace: true });
 }
@@ -225,6 +221,7 @@ function signOut() {
     if(token){
       auth.checkToken(token)
       .then((res) => {
+        console.log(res)
         if(res){
           const email = res.data.email;
           setUserData(email);
@@ -235,7 +232,7 @@ function signOut() {
     } 
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     checkAuthToken();
   }, []);
 

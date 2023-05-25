@@ -15,6 +15,7 @@ const handleChange =(e) => {
       [name]: value
     });
 }
+
 const handleSubmit = (e) => {
   e.preventDefault();
   if (!formValue.email || !formValue.password){
@@ -22,8 +23,6 @@ const handleSubmit = (e) => {
       }
   handleLogin(formValue.email, formValue.password)
 } 
-
-
 
 return (
   <div className="register">
